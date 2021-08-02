@@ -1,0 +1,8 @@
+name: Address Customize
+type: module
+description: 'Provides functionality for handling postal addresses in popular country in the world.'
+package: Field types
+core_version_requirement: ^8.8 || ^9
+config: entity.address_format.collection
+dependencies:
+  - drupal:address

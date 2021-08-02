@@ -1,0 +1,5 @@
+services:
+  address_customize.event_subscriber:
+    class: Drupal\address_customize\EventSubscriber\AddressCustomizeEventSubscriber
+    tags:
+      - { name: event_subscriber }
