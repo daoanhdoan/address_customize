@@ -1,9 +1,12 @@
 {
-  "name": "daoanhdoan/address_customize",
-  "description": "Address Customize - Provides functionality for handling postal addresses in popular country in the world.",
-  "type": "drupal-custom-module",
-  "license":"GPL-2.0",
-  "extra": {
-    "installer-name": "address_customize"
-  }
+    "name" : "daoanhdoan/address_customize",
+    "description": "Address Customize - Provides functionality for handling postal addresses in popular country in the world.",
+    "type" : "drupal-custom-module",
+    "license": "GPL-2.0",
+    "extra": {
+        "installer-name": "address_customize"
+    },
+    "require": {
+        "drupal/address": "*"
+    }
 }
