@@ -47,6 +47,7 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
   public function settingsForm(array $form, FormStateInterface $form_state)
   {
     $overrides = $this->getFieldSetting('field_overrides');
+    $field_overrides = [];
     foreach ($overrides as $field => $data) {
       $field_overrides[$field] = $data['override'];
     }
