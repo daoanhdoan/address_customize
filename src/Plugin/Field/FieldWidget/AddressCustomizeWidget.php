@@ -145,8 +145,8 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
     /*if (empty($element['address']['default_value']['country_code'])) {
       $element['address']['#default_value']['country_code'] = \Drupal::config('system.date')->get('country.default');
     }*/
+    $element['address']['#after_build'][] = [get_class($this), 'customizeAfterBuild'];
 
-    $element['address']['#after_build'][] = [get_class($this), 'makeFieldsOptional'];
 
     return $element;
   }
@@ -154,14 +154,8 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
   /**
    * Form API callback: Makes all address field properties optional.
    */
-  public static function makeFieldsOptional(array $element, FormStateInterface $form_state)
+  public static function customizeAfterBuild(array $element, FormStateInterface $form_state)
   {
-    foreach (Element::getVisibleChildren($element) as $key) {
-      if (!empty($element[$key]['#required'])) {
-        $element[$key]['#required'] = FALSE;
-      }
-    }
-
     if ($field_options = $element['#field_options']) {
       foreach ($field_options as $field => $options) {
         if (!empty($element[$field])) {
