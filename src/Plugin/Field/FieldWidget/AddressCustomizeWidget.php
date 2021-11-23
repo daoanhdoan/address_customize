@@ -75,6 +75,7 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
 
         $field_weight = !empty($field_options[$field]['weight']) ? $field_options[$field]['weight'] : 0;
         $title = !empty($field_options[$field]['title']) ? $field_options[$field]['title'] : $labels[$field];
+        $placeholder = !empty($field_options[$field]['placeholder']) ? $field_options[$field]['placeholder'] : "";
         $elements[$field]['title'] = [
           '#type' => 'textfield',
           '#title' => $labels[$field],
@@ -82,6 +83,14 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
           '#default_value' => $title,
           '#required' => TRUE
         ];
+
+        $elements[$field]['placeholder'] = array(
+          '#type' => 'textfield',
+          '#title' => $labels[$field],
+          '#title_display' => 'invisible',
+          '#default_value' => $placeholder,
+          '#attributes' => ['class' => ['field-placeholder']],
+        );
         $elements[$field]['weight'] = array(
           '#type' => 'weight',
           '#title' => $labels[$field],
@@ -99,6 +108,7 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
       '#header' => [
         'field' => t('Field'),
         'title' => t('Title'),
+        'placeholder' => t('Placeholder'),
         'weight' => t('Weight')
       ],
       '#attributes' => [
@@ -161,6 +171,9 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
         if (!empty($element[$field])) {
           $element[$field]['#weight'] = $options['weight'];
           $element[$field]['#title'] = t($options['title']);
+          if (!empty($options['placeholder'])){
+            $element[$field]['#attributes']['placeholder'] = t($options['placeholder']);
+          }
         }
       }
     }
