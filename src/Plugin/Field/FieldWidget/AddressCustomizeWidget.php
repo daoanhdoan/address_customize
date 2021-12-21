@@ -66,6 +66,7 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
 
     $grouped_fields = AddressFormatHelper::getGroupedFields($format_string, $field_overrides);
     $labels = LabelHelper::getGenericFieldLabels();
+    $weight = 0;
     foreach ($grouped_fields as $line_index => $line_fields) {
       foreach ($line_fields as $field_index => $field) {
         $elements[$field]['field'] = array(
@@ -73,7 +74,7 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
           '#markup' => $labels[$field],
         );
 
-        $field_weight = !empty($field_options[$field]['weight']) ? $field_options[$field]['weight'] : 0;
+        $field_weight = !empty($field_options[$field]['weight']) ? $field_options[$field]['weight'] : $weight++;
         $title = !empty($field_options[$field]['title']) ? $field_options[$field]['title'] : $labels[$field];
         $placeholder = !empty($field_options[$field]['placeholder']) ? $field_options[$field]['placeholder'] : "";
         $elements[$field]['title'] = [
@@ -112,7 +113,7 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
         'weight' => t('Weight')
       ],
       '#attributes' => [
-        'id' => 'field-widget-address-vn-field-options',
+        'id' => 'field-widget-address-customize-field-options',
         'class' => ['clearfix']
       ],
       '#tree' => TRUE,
