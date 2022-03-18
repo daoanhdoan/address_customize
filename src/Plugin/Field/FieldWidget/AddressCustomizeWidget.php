@@ -24,7 +24,7 @@ use Drupal\Core\Render\Element;
  *   id = "address_customize",
  *   label = @Translation("Address Customize"),
  *   field_types = {
- *     "address"
+ *     "address", "address_customize"
  *   },
  * )
  */

@@ -33,7 +33,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "address_customize_default",
  *   label = @Translation("Default(Customize)"),
  *   field_types = {
- *     "address",
+ *     "address", "address_customize"
  *   },
  * )
  */
