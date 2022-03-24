@@ -38,6 +38,9 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
     return [
         'hide_country_code' => FALSE,
         'field_options' => [],
+        'address_box' => FALSE,
+        'address_box_row' => 4,
+        'wrapper_container' => FALSE
       ] + parent::defaultSettings();
   }
 
@@ -65,6 +68,9 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
     $field_options = $this->getSetting('field_options');
 
     $grouped_fields = AddressFormatHelper::getGroupedFields($format_string, $field_overrides);
+    $address_format = \Drupal::service('address.address_format_repository')->get(\Drupal::configFactory()->get('system.date')->get('country.default'));
+    $required_fields = AddressFormatHelper::getRequiredFields($address_format, $field_overrides);
+    $labels = LabelHelper::getFieldLabels($address_format);
     $labels = LabelHelper::getGenericFieldLabels();
     $weight = 0;
     foreach ($grouped_fields as $line_index => $line_fields) {
@@ -132,6 +138,21 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
       '#title' => t('Hide the country when only one is available'),
       '#default_value' => $this->getSetting('hide_country_code'),
     );
+    $form['address_box'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use Address Line as Address Box'),
+      '#default_value' => $this->getSetting('address_box'),
+    );
+    $form['address_box_row'] = array(
+      '#type' => 'number',
+      '#title' => t('Address box rows'),
+      '#default_value' => $this->getSetting('address_box_row'),
+    );
+    $form['wrapper_container'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Wrapper by container'),
+      '#default_value' => $this->getSetting('wrapper_container'),
+    );
     return $form;
   }
 
@@ -149,15 +170,25 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
         $element['address']['#field_options'][$property] = $options;
       }
     }
-    if(!empty($element['address']['#available_countries'])) {
+    $element['address']['#address_box'] = $this->getSetting('address_box');
+    $element['address']['#address_box_row'] = $this->getSetting('address_box_row');
+
+    if (!empty($element['address']['#available_countries'])) {
       $element['address']['#hide_country_code'] = count($element['address']['#available_countries']) == 1 && $this->getSetting('hide_country_code') ? TRUE : FALSE;
     }
 
-    /*if (empty($element['address']['default_value']['country_code'])) {
+    if (empty($element['address']['default_value']['country_code']) && !empty($element['address']['#hide_country_code'])) {
       $element['address']['#default_value']['country_code'] = \Drupal::config('system.date')->get('country.default');
-    }*/
+    }
     $element['address']['#after_build'][] = [get_class($this), 'customizeAfterBuild'];
-
+    $element['address']['#process'] = [
+      'Drupal\address\Element\Address::processAddress',
+      'Drupal\address\Element\Address::processGroup',
+      [get_class($this), 'customAddressProcess']
+    ];
+    if ($this->getSetting('wrapper_container')) {
+      $element['#theme_wrappers'] = ['container'];
+    }
 
     return $element;
   }
@@ -167,13 +198,21 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
    */
   public static function customizeAfterBuild(array $element, FormStateInterface $form_state)
   {
-    if ($field_options = $element['#field_options']) {
+    /*if ($field_options = $element['#field_options']) {
+      $state = [
+        'visible' => [
+          ':input[name="' . $element['address_box']['#name'] . '"]' => ['checked' => TRUE],
+        ],
+      ];
       foreach ($field_options as $field => $options) {
         if (!empty($element[$field])) {
           $element[$field]['#weight'] = $options['weight'];
           $element[$field]['#title'] = t($options['title']);
-          if (!empty($options['placeholder'])){
+          if (!empty($options['placeholder'])) {
             $element[$field]['#attributes']['placeholder'] = t($options['placeholder']);
+          }
+          if ($field !== 'address_line1' && !empty($element['#address_box'])) {
+            $element[$field]['#states'] = $state;
           }
         }
       }
@@ -183,6 +222,52 @@ class AddressCustomizeWidget extends AddressDefaultWidget implements ContainerFa
 
     if (!empty($element['#hide_country_code'])) {
       $element['country_code']['#attributes']['class'][] = 'visually-hidden';
+    }*/
+    return $element;
+  }
+
+  public static function customAddressProcess(array &$element, FormStateInterface $form_state, array &$complete_form)
+  {
+    if (!empty($element['address_line1']) && !empty($element['#address_box'])) {
+      $label = !empty($element['#field_options']['address_line1']['title']) ? $element['#field_options']['address_line1']['title'] : t('Address Street');
+      $element['address_box'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Use @label as Address Box', ['@label' => $label]),
+        '#attributes' => array('checked' => !empty($element['#address_box']) ? TRUE : FALSE),
+        '#weight' => -99
+      );
+    }
+
+    if ($field_options = $element['#field_options']) {
+      $state = [
+        'visible' => [
+          ':input[name="' . $element['#name'] . '[address_box]"]' => ['checked' => FALSE],
+        ],
+      ];
+      foreach ($field_options as $field => $options) {
+        if (!empty($element[$field])) {
+          $element[$field]['#weight'] = $options['weight'];
+          $element[$field]['#title'] = t($options['title']);
+          if (!empty($options['placeholder'])) {
+            $element[$field]['#attributes']['placeholder'] = t($options['placeholder']);
+          }
+
+          if ($field !== 'address_line1' && !empty($element['#address_box'])) {
+            $element[$field]['#states'] = $state;
+          }
+        }
+      }
+    }
+
+    uasort($element, [SortArray::class, 'sortByWeightProperty']);
+
+    if (!empty($element['#hide_country_code'])) {
+      $element['country_code']['#attributes']['class'][] = 'visually-hidden';
+    }
+
+    if (!empty($element['address_line1']) && !empty($element['#address_box'])) {
+      $element['address_line1']['#type'] = 'textarea';
+      $element['address_line1']['#row'] = !empty($element['#address_box_row']) ? $element['#address_box_row'] : '4';
     }
 
     return $element;

@@ -2,6 +2,8 @@
 
 namespace Drupal\address_customize\Plugin\Field\FieldType;
 
+use CommerceGuys\Addressing\AddressFormat\AddressField;
+use CommerceGuys\Addressing\AddressFormat\FieldOverride;
 use Drupal\address\Plugin\Field\FieldType\AddressItem;
 use Drupal\address\Plugin\Field\FieldType\AvailableCountriesTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -51,5 +53,26 @@ class AddressCustomizeItem extends AddressItem {
     $properties['address_line1'] = DataDefinition::create('text')
       ->setLabel(t('The first line of the address block'));
     return $properties;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultFieldSettings() {
+    $settings = parent::defaultFieldSettings();
+    $settings['field_overrides'] = [
+      AddressField::GIVEN_NAME => ['override' => FieldOverride::HIDDEN],
+      AddressField::ADDITIONAL_NAME => ['override' => FieldOverride::HIDDEN],
+      AddressField::FAMILY_NAME => ['override' => FieldOverride::HIDDEN],
+      AddressField::ORGANIZATION => ['override' => FieldOverride::HIDDEN],
+      AddressField::ADDRESS_LINE1 => ['override' => FieldOverride::OPTIONAL],
+      AddressField::ADDRESS_LINE2 => ['override' => FieldOverride::HIDDEN],
+      AddressField::POSTAL_CODE => ['override' => FieldOverride::OPTIONAL],
+      AddressField::SORTING_CODE => ['override' => FieldOverride::HIDDEN],
+      AddressField::DEPENDENT_LOCALITY => ['override' => FieldOverride::OPTIONAL],
+      AddressField::LOCALITY => ['override' => FieldOverride::OPTIONAL],
+      AddressField::ADMINISTRATIVE_AREA => ['override' => FieldOverride::OPTIONAL],
+    ];
+    return $settings;
   }
 }
